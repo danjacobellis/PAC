@@ -118,21 +118,27 @@ class AttentionBlock1D(nn.Module):
         return out
 
 class RateDistortionAutoEncoder(CompressionModel):
-    def __init__(self, N=128):
+    def __init__(self, N=96):
         super().__init__()
         self.entropy_bottleneck = EntropyBottleneck(N)
         self.encode = nn.Sequential(
-            analysis_1d(7, 16),
-            GDN_1d(16),
-            analysis_1d(16, 32),
-            GDN_1d(32),
-            analysis_1d(32, 64),
-            GDN_1d(64),
-            analysis_1d(64, N),
+            analysis_1d(7, 12),
+            GDN_1d(12),
+            analysis_1d(12, 20),
+            GDN_1d(20),
+            analysis_1d(20, 36),
+            GDN_1d(36),
+            analysis_1d(36, 60),
+            GDN_1d(60),
+            analysis_1d(60, 96),
         )
 
         self.decode = nn.Sequential(
             AttentionBlock1D(N),
+            synthesis_1d(N, N),
+            ResidualBottleneckBlock1D(N, N),
+            ResidualBottleneckBlock1D(N, N),
+            ResidualBottleneckBlock1D(N, N),
             synthesis_1d(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
