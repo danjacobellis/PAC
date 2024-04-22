@@ -118,42 +118,36 @@ class AttentionBlock1D(nn.Module):
         return out
 
 class RateDistortionAutoEncoder(CompressionModel):
-    def __init__(self, N=96):
+    def __init__(self, N=126):
         super().__init__()
         self.entropy_bottleneck = EntropyBottleneck(N)
         self.encode = nn.Sequential(
-            analysis_1d(7, 12),
-            GDN_1d(12),
-            analysis_1d(12, 20),
-            GDN_1d(20),
-            analysis_1d(20, 36),
-            GDN_1d(36),
-            analysis_1d(36, 60),
-            GDN_1d(60),
-            analysis_1d(60, 96),
+            nn.Conv1d(7, N, kernel_size=5, stride=2, padding=2, groups=7),
+            GDN_1d(N),
+            nn.Conv1d(N, N, kernel_size=5, stride=2, padding=2, groups=3),
+            GDN_1d(N),
+            nn.Conv1d(N, N, kernel_size=5, stride=2, padding=2, groups=2),
+            GDN_1d(N),
+            nn.Conv1d(N, N, kernel_size=5, stride=2, padding=2, groups=1),
         )
 
         self.decode = nn.Sequential(
             AttentionBlock1D(N),
-            synthesis_1d(N, N),
+            nn.ConvTranspose1d(N, N, kernel_size=5, stride=2, padding=2, output_padding=1),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            synthesis_1d(N, N),
-            ResidualBottleneckBlock1D(N, N),
-            ResidualBottleneckBlock1D(N, N),
-            ResidualBottleneckBlock1D(N, N),
-            synthesis_1d(N, N),
+            nn.ConvTranspose1d(N, N, kernel_size=5, stride=2, padding=2, output_padding=1),
             AttentionBlock1D(N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            synthesis_1d(N, N),
+            nn.ConvTranspose1d(N, N, kernel_size=5, stride=2, padding=2, output_padding=1),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            synthesis_1d(N, 7),
-            torch.nn.Hardtanh(min_val=-0.5, max_val=0.5),
+            nn.ConvTranspose1d(N, 7, kernel_size=5, stride=2, padding=2, output_padding=1),
+            torch.nn.Hardtanh(min_val=-1, max_val=1),
         )
 
     def forward(self, x):
