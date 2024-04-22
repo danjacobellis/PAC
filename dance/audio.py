@@ -118,7 +118,7 @@ class AttentionBlock1D(nn.Module):
         return out
 
 class RateDistortionAutoEncoder(CompressionModel):
-    def __init__(self, N=126):
+    def __init__(self, N=128):
         super().__init__()
         self.entropy_bottleneck = EntropyBottleneck(N)
         self.encode = nn.Sequential(
@@ -133,20 +133,20 @@ class RateDistortionAutoEncoder(CompressionModel):
 
         self.decode = nn.Sequential(
             AttentionBlock1D(N),
-            nn.ConvTranspose1d(N, N, kernel_size=7 stride=5, padding=3, output_padding=0),
+            nn.ConvTranspose1d(N, N, kernel_size=7, stride=5, padding=3, output_padding=4),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            nn.ConvTranspose1d(N, N, kernel_size=5, stride=4, padding=2, output_padding=0),
+            nn.ConvTranspose1d(N, N, kernel_size=5, stride=4, padding=2, output_padding=3),
             AttentionBlock1D(N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            nn.ConvTranspose1d(N, N, kernel_size=5, stride=3, padding=2, output_padding=0),
+            nn.ConvTranspose1d(N, N, kernel_size=5, stride=3, padding=2, output_padding=2),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            nn.ConvTranspose1d(N, 7, kernel_size=3, stride=2, padding=1, output_padding=0),
+            nn.ConvTranspose1d(N, 7, kernel_size=3, stride=2, padding=1, output_padding=1),
             torch.nn.Hardtanh(min_val=-1, max_val=1),
         )
 
