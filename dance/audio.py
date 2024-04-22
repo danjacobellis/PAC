@@ -122,31 +122,31 @@ class RateDistortionAutoEncoder(CompressionModel):
         super().__init__()
         self.entropy_bottleneck = EntropyBottleneck(N)
         self.encode = nn.Sequential(
-            nn.Conv1d(7, N, kernel_size=5, stride=2, padding=2, groups=7),
+            nn.Conv1d(7, N, kernel_size=3, stride=2, padding=1),
             GDN_1d(N),
-            nn.Conv1d(N, N, kernel_size=5, stride=2, padding=2, groups=3),
+            nn.Conv1d(N, N, kernel_size=5, stride=3, padding=2),
             GDN_1d(N),
-            nn.Conv1d(N, N, kernel_size=5, stride=2, padding=2, groups=2),
+            nn.Conv1d(N, N, kernel_size=5, stride=4, padding=2),
             GDN_1d(N),
-            nn.Conv1d(N, N, kernel_size=5, stride=2, padding=2, groups=1),
+            nn.Conv1d(N, N, kernel_size=7, stride=5, padding=3),
         )
 
         self.decode = nn.Sequential(
             AttentionBlock1D(N),
-            nn.ConvTranspose1d(N, N, kernel_size=5, stride=2, padding=2, output_padding=1),
+            nn.ConvTranspose1d(N, N, kernel_size=7 stride=5, padding=3, output_padding=0),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            nn.ConvTranspose1d(N, N, kernel_size=5, stride=2, padding=2, output_padding=1),
+            nn.ConvTranspose1d(N, N, kernel_size=5, stride=4, padding=2, output_padding=0),
             AttentionBlock1D(N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            nn.ConvTranspose1d(N, N, kernel_size=5, stride=2, padding=2, output_padding=1),
+            nn.ConvTranspose1d(N, N, kernel_size=5, stride=3, padding=2, output_padding=0),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
             ResidualBottleneckBlock1D(N, N),
-            nn.ConvTranspose1d(N, 7, kernel_size=5, stride=2, padding=2, output_padding=1),
+            nn.ConvTranspose1d(N, 7, kernel_size=3, stride=2, padding=1, output_padding=0),
             torch.nn.Hardtanh(min_val=-1, max_val=1),
         )
 
