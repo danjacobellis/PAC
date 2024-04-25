@@ -1,2 +1,2 @@
 # PAC
-Project Arai Compression
+Project Aria Compression
